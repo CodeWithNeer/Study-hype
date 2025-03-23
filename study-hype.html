@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Hype - Minimal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wght@400;500;700&family=Caveat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;700&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --text-color: #333333;
+            --accent-color: #003afa;
+            --border-color: #e0e0e0;
+            --widget-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --primary-font: 'Hubot Sans', sans-serif;
+            --mono-font: 'Space Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            letter-spacing: -1px;
+        }
+
+        body {
+            font-family: 'Hubot Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding: 20px;
+        }
+
+        button {
+            font-family: 'hubot Sans';
+        }
+
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: transform 0.5s ease;
+        }
+
+        .welcome-screen.hidden {
+            transform: translateY(-100%);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .welcome-screen h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-screen p {
+            margin-bottom: 2rem;
+            opacity: 0.7;
+        }
+
+        .name-input {
+            background: var(--widget-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            max-width: 300px;
+            font-family: 'Hubot Sans', sans-serif;
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .start-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.8rem 2rem;
+            font-family: 'Hubot Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .widget {
+            background: var(--widget-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            height: 380px;
+            overflow-y: auto;
+        }
+
+
+        .widget-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Pomodoro Widget */
+        .pomodoro-widget {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .timer-display {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .timer-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px 15px;
+            flex: 1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 40px;
+        }
+
+        .timer-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .timer-action-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .timer-action-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .timer-action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        /* Music Widget */
+        .music-widget {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .music-services {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .service-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px 15px;
+            flex: 1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .service-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .playlist-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .playlist-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .playlist-item:last-child {
+            border-bottom: none;
+        }
+
+        .playlist-item:hover {
+            background: var(--bg-color);
+        }
+
+        .playlist-icon {
+            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .playlist-title {
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Todo Widget */
+        .todo-widget {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .todo-input-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px 0 0 4px;
+            font-family: 'Hubot Sans', sans-serif;
+        }
+
+        .todo-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .add-todo-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .todo-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        .todo-checkbox {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .todo-text {
+            flex: 1;
+        }
+
+        .todo-text.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .todo-delete {
+            color: #999;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .todo-delete:hover {
+            color: #555;
+        }
+
+        /* Stats Widget */
+        .stats-widget {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .notes-container {
+            margin-top: 15px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            height: 100px;
+            resize: none;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: 'Hubot Sans', sans-serif;
+            margin-top: 10px;
+        }
+
+        .notes-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--widget-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        /* Dark theme */
+        body.dark-theme {
+            --bg-color: #121212;
+            --text-color: #f5f5f5;
+            --accent-color: #3700ff;
+            --border-color: #2c2c2c;
+            --widget-bg: #1e1e1e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+            }
+
+            .pomodoro-widget,
+            .music-widget,
+            .todo-widget,
+            .stats-widget {
+                grid-column: 1;
+            }
+
+            .pomodoro-widget {
+                grid-row: 1;
+            }
+
+            .todo-widget {
+                grid-row: 2;
+            }
+
+            .music-widget {
+                grid-row: 3;
+            }
+
+            .stats-widget {
+                grid-row: 4;
+            }
+
+            .widget {
+                height: auto;
+                min-height: 300px;
+            }
+        }
+
+        /* Dark mode form elements */
+        body.dark-theme input,
+        body.dark-theme textarea,
+        body.dark-theme .todo-input,
+        body.dark-theme .name-input,
+        body.dark-theme .notes-textarea {
+            background-color: #2d2d2d;
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        body.dark-theme .service-btn,
+        body.dark-theme .timer-btn {
+            background-color: #2d2d2d;
+            color: var(--text-color);
+        }
+
+        body.dark-theme .service-btn.active,
+        body.dark-theme .timer-btn.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Settings Panel */
+        .settings-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--widget-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: var(--widget-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            width: 250px;
+        }
+
+        .settings-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-option {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .settings-option span {
+            margin-right: 10px;
+            display: inline-block;
+            min-width: 60px;
+        }
+
+        .settings-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .settings-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Mono font body class */
+        body.mono-font {
+            font-family: var(--mono-font);
+        }
+
+        body.mono-font input,
+        body.mono-font textarea,
+        body.mono-font button {
+            font-family: var(--mono-font);
+        }
+
+        /* Hide old theme toggle since we've moved it to settings */
+        .theme-toggle {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="welcome-screen" id="welcome-screen">
+        <h1>STUDY HYPE</h1>
+        <p>Focus + Organization + Minimal Distractions</p>
+        <input type="text" class="name-input" placeholder="Enter your name" id="name-input">
+        <button class="start-btn" id="start-btn">START FOCUSING</button>
+    </div>
+
+    <button class="theme-toggle" id="theme-toggle">Dark Mode</button>
+
+    <div class="dashboard" id="dashboard" style="display: none;">
+        <!-- Pomodoro Widget -->
+        <div class="widget pomodoro-widget">
+            <div class="widget-title">Pomodoro Timer</div>
+            <div class="timer-display" id="timer">25:00</div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="timer-controls">
+                <button class="timer-btn active" data-time="25">Focus</button>
+                <button class="timer-btn" data-time="5">Short Break</button>
+                <button class="timer-btn" data-time="15">Long Break</button>
+            </div>
+            <div class="timer-action-row">
+                <button class="timer-action-btn" id="start-timer">START</button>
+                <button class="timer-action-btn" id="reset-timer">RESET</button>
+            </div>
+            <div id="session-count" style="text-align: center; margin-top: 15px; font-size: 0.9rem; opacity: 0.7;">
+                Sessions completed: 0
+            </div>
+        </div>
+
+        <!-- Todo Widget -->
+        <div class="widget todo-widget">
+            <div class="widget-title">Study Tasks</div>
+            <div class="todo-input-container">
+                <input type="text" class="todo-input" id="todo-input" placeholder="Add a new task...">
+                <button class="add-todo-btn" id="add-todo-btn">+</button>
+            </div>
+            <div class="todo-list" id="todo-list">
+                <!-- Tasks will be added here -->
+            </div>
+        </div>
+
+        <!-- Music Widget -->
+        <div class="widget music-widget">
+            <div class="widget-title">Focus Music</div>
+            <div class="music-services">
+                <button class="service-btn active" data-service="spotify">Spotify</button>
+                <button class="service-btn" data-service="youtube">YouTube</button>
+            </div>
+            <div class="playlist-list" id="playlist-list">
+                <div class="playlist-item" data-url="https://open.spotify.com/playlist/37i9dQZF1DX8NTLI2TtZa6">
+                    <span class="playlist-icon">▶️</span>
+                    <span class="playlist-title">Lofi Focus</span>
+                </div>
+                <div class="playlist-item" data-url="https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ">
+                    <span class="playlist-icon">▶️</span>
+                    <span class="playlist-title">White Noise</span>
+                </div>
+                <div class="playlist-item" data-url="https://open.spotify.com/playlist/37i9dQZF1DX5trt9i14X7j">
+                    <span class="playlist-icon">▶️</span>
+                    <span class="playlist-title">Coding Mode</span>
+                </div>
+                <div class="playlist-item" data-url="https://open.spotify.com/playlist/37i9dQZF1DX9sIqqvKsjG8">
+                    <span class="playlist-icon">▶️</span>
+                    <span class="playlist-title">Deep Focus</span>
+                </div>
+                <div class="playlist-item" data-url="https://open.spotify.com/playlist/37i9dQZF1DX3PFzdbtx1Us">
+                    <span class="playlist-icon">▶️</span>
+                    <span class="playlist-title">Atmospheric Piano</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats & Notes Widget -->
+        <div class="widget stats-widget">
+            <div class="widget-title">Study Stats & Notes</div>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="focus-minutes">0</div>
+                    <div class="stat-label">Focus Minutes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="tasks-completed">0</div>
+                    <div class="stat-label">Tasks Completed</div>
+                </div>
+            </div>
+            <div class="notes-container">
+                <div style="font-size: 0.9rem; margin-top: 15px;">Quick Notes:</div>
+                <textarea class="notes-textarea" id="notes-textarea" placeholder="Take notes here..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-panel" id="settings-panel" style="display: none;">
+        <div class="settings-title">Settings</div>
+        <div class="settings-option">
+            <span>Theme:</span>
+            <button class="settings-btn active" data-setting="theme" data-value="light">Light</button>
+            <button class="settings-btn" data-setting="theme" data-value="dark">Dark</button>
+        </div>
+        <div class="settings-option">
+            <span>Font:</span>
+            <button class="settings-btn active" data-setting="font" data-value="standard">Standard</button>
+            <button class="settings-btn" data-setting="font" data-value="mono">Monospace</button>
+        </div>
+    </div>
+
+    <button class="settings-toggle" id="settings-toggle">⚙️</button>
+    <script>
+        // DOM Elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const dashboard = document.getElementById('dashboard');
+        const nameInput = document.getElementById('name-input');
+        const startBtn = document.getElementById('start-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+
+        // Pomodoro Elements
+        const timerDisplay = document.getElementById('timer');
+        const timerButtons = document.querySelectorAll('.timer-btn');
+        const startTimerBtn = document.getElementById('start-timer');
+        const resetTimerBtn = document.getElementById('reset-timer');
+        const progressBar = document.getElementById('progress');
+        const sessionCount = document.getElementById('session-count');
+
+        // Todo Elements
+        const todoInput = document.getElementById('todo-input');
+        const addTodoBtn = document.getElementById('add-todo-btn');
+        const todoList = document.getElementById('todo-list');
+
+        // Music Elements
+        const serviceButtons = document.querySelectorAll('.service-btn');
+        const playlistList = document.getElementById('playlist-list');
+
+        // Stats Elements
+        const focusMinutes = document.getElementById('focus-minutes');
+        const tasksCompleted = document.getElementById('tasks-completed');
+        const notesTextarea = document.getElementById('notes-textarea');
+
+        // Variables
+        let userName = '';
+        let timerMinutes = 25;
+        let timerSeconds = 0;
+        let timerInterval;
+        let isTimerRunning = false;
+        let totalSeconds = timerMinutes * 60;
+        let remainingSeconds = totalSeconds;
+        let sessionsCompleted = 0;
+        let totalFocusMinutes = 0;
+        let completedTasks = 0;
+        let todos = [];
+        let isDarkMode = false;
+        let currentService = 'spotify';
+        let currentlyPlaying = null;
+        let musicPlayer = null;
+        let customPlaylists = [];
+
+        // Initialize from localStorage if available
+        function initFromLocalStorage() {
+            if (localStorage.getItem('studyHypeTodos')) {
+                todos = JSON.parse(localStorage.getItem('studyHypeTodos'));
+                renderTodos();
+            }
+
+            if (localStorage.getItem('studyHypeNotes')) {
+                notesTextarea.value = localStorage.getItem('studyHypeNotes');
+            }
+
+            if (localStorage.getItem('studyHypeFocusMinutes')) {
+                totalFocusMinutes = parseInt(localStorage.getItem('studyHypeFocusMinutes'));
+                focusMinutes.textContent = totalFocusMinutes;
+            }
+
+            if (localStorage.getItem('studyHypeTasksCompleted')) {
+                completedTasks = parseInt(localStorage.getItem('studyHypeTasksCompleted'));
+                tasksCompleted.textContent = completedTasks;
+            }
+
+            if (localStorage.getItem('studyHypeSessionsCompleted')) {
+                sessionsCompleted = parseInt(localStorage.getItem('studyHypeSessionsCompleted'));
+                sessionCount.textContent = `Sessions completed: ${sessionsCompleted}`;
+            }
+
+            if (localStorage.getItem('studyHypeDarkMode') === 'true') {
+                toggleDarkMode();
+            }
+
+            if (localStorage.getItem('studyHypeCustomPlaylists')) {
+                customPlaylists = JSON.parse(localStorage.getItem('studyHypeCustomPlaylists'));
+            }
+        }
+
+        // Start App
+        function startApp() {
+            userName = nameInput.value.trim() || 'Student';
+            welcomeScreen.classList.add('hidden');
+            dashboard.style.display = 'grid';
+
+            initFromLocalStorage();
+
+            function startApp() {
+                userName = nameInput.value.trim() || 'Student';
+                welcomeScreen.classList.add('hidden');
+                dashboard.style.display = 'grid';
+
+                initFromLocalStorage();
+                initSettings();
+
+                // Rest of your code...
+            }
+
+            // Request notification permission
+            if ('Notification' in window) {
+                Notification.requestPermission();
+            }
+
+            // Create Music Player UI
+            createMusicPlayerUI();
+            updatePlaylists();
+        }
+
+        // Timer functions
+        function updateTimer() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            const progressPercent = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            if (remainingSeconds === 0) {
+                clearInterval(timerInterval);
+                startTimerBtn.textContent = 'START';
+                isTimerRunning = false;
+
+                // Only count as completed session if it was a focus session
+                if (timerMinutes === 25) {
+                    sessionsCompleted++;
+                    sessionCount.textContent = `Sessions completed: ${sessionsCompleted}`;
+                    totalFocusMinutes += 25;
+                    focusMinutes.textContent = totalFocusMinutes;
+
+                    localStorage.setItem('studyHypeSessionsCompleted', sessionsCompleted);
+                    localStorage.setItem('studyHypeFocusMinutes', totalFocusMinutes);
+                }
+
+                // Play notification sound
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-alert-notification-258.mp3');
+                audio.play().catch(e => console.log('Audio play failed:', e));
+
+                // Show notification
+                if (Notification.permission === 'granted') {
+                    new Notification('Study Hype', {
+                        body: `Timer completed! ${timerMinutes === 25 ? 'Take a break!' : 'Ready to focus again?'}`
+                    });
+                }
+            }
+
+            remainingSeconds--;
+        }
+
+        function startTimer() {
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                startTimerBtn.textContent = 'START';
+                isTimerRunning = false;
+                return;
+            }
+
+            if (remainingSeconds <= 0) {
+                remainingSeconds = timerMinutes * 60;
+                totalSeconds = remainingSeconds;
+            }
+
+            timerInterval = setInterval(updateTimer, 1000);
+            startTimerBtn.textContent = 'PAUSE';
+            isTimerRunning = true;
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            remainingSeconds = timerMinutes * 60;
+            totalSeconds = remainingSeconds;
+            timerDisplay.textContent = `${timerMinutes.toString().padStart(2, '0')}:00`;
+            progressBar.style.width = '0%';
+            startTimerBtn.textContent = 'START';
+            isTimerRunning = false;
+        }
+
+        function setTimerDuration(minutes) {
+            timerMinutes = minutes;
+            remainingSeconds = timerMinutes * 60;
+            totalSeconds = remainingSeconds;
+
+            timerDisplay.textContent = `${timerMinutes.toString().padStart(2, '0')}:00`;
+            progressBar.style.width = '0%';
+
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                startTimer();
+            }
+        }
+
+        // Todo functions
+        function addTodo() {
+            const todoText = todoInput.value.trim();
+            if (todoText === '') return;
+
+            todos.push({
+                id: Date.now(),
+                text: todoText,
+                completed: false
+            });
+
+            todoInput.value = '';
+            renderTodos();
+            saveTodos();
+        }
+
+        function toggleTodo(id) {
+            todos = todos.map(todo => {
+                if (todo.id === id) {
+                    if (!todo.completed) {
+                        completedTasks++;
+                        tasksCompleted.textContent = completedTasks;
+                        localStorage.setItem('studyHypeTasksCompleted', completedTasks);
+                    } else {
+                        completedTasks = Math.max(0, completedTasks - 1);
+                        tasksCompleted.textContent = completedTasks;
+                        localStorage.setItem('studyHypeTasksCompleted', completedTasks);
+                    }
+                    return { ...todo, completed: !todo.completed };
+                }
+                return todo;
+            });
+
+            renderTodos();
+            saveTodos();
+        }
+
+        function deleteTodo(id) {
+            const todoToDelete = todos.find(todo => todo.id === id);
+            if (todoToDelete && todoToDelete.completed) {
+                completedTasks = Math.max(0, completedTasks - 1);
+                tasksCompleted.textContent = completedTasks;
+                localStorage.setItem('studyHypeTasksCompleted', completedTasks);
+            }
+
+            todos = todos.filter(todo => todo.id !== id);
+            renderTodos();
+            saveTodos();
+        }
+
+        function renderTodos() {
+            todoList.innerHTML = '';
+
+            if (todos.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.style.padding = '10px';
+                emptyMessage.style.opacity = '0.7';
+                emptyMessage.textContent = 'No tasks yet. Add your study goals!';
+                todoList.appendChild(emptyMessage);
+                return;
+            }
+
+            todos.forEach(todo => {
+                const todoItem = document.createElement('div');
+                todoItem.classList.add('todo-item');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('todo-checkbox');
+                checkbox.checked = todo.completed;
+                checkbox.addEventListener('change', () => toggleTodo(todo.id));
+
+                const todoText = document.createElement('span');
+                todoText.classList.add('todo-text');
+                todoText.textContent = todo.text;
+                if (todo.completed) {
+                    todoText.classList.add('completed');
+                }
+
+                const deleteBtn = document.createElement('span');
+                deleteBtn.classList.add('todo-delete');
+                deleteBtn.textContent = '×';
+                deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
+
+                todoItem.appendChild(checkbox);
+                todoItem.appendChild(todoText);
+                todoItem.appendChild(deleteBtn);
+
+                todoList.appendChild(todoItem);
+            });
+        }
+
+        function saveTodos() {
+            localStorage.setItem('studyHypeTodos', JSON.stringify(todos));
+        }
+
+        // Music Player functions
+        function createMusicPlayerUI() {
+            // Create music player container
+            const musicPlayerContainer = document.createElement('div');
+            musicPlayerContainer.classList.add('music-player-container');
+            musicPlayerContainer.style.marginTop = '15px';
+
+            // Create custom URL input
+            const customUrlContainer = document.createElement('div');
+            customUrlContainer.style.display = 'flex';
+            customUrlContainer.style.marginBottom = '10px';
+
+            const customUrlInput = document.createElement('input');
+            customUrlInput.type = 'text';
+            customUrlInput.placeholder = 'Paste YouTube or Spotify link';
+            customUrlInput.style.flex = '1';
+            customUrlInput.style.padding = '8px';
+            customUrlInput.style.borderRadius = '4px 0 0 4px';
+            customUrlInput.style.border = '1px solid var(--border-color)';
+            customUrlInput.style.fontFamily = "'Hubot Sans', sans-serif";
+
+            const addUrlBtn = document.createElement('button');
+            addUrlBtn.textContent = 'Add';
+            addUrlBtn.style.background = 'var(--accent-color)';
+            addUrlBtn.style.color = 'white';
+            addUrlBtn.style.border = 'none';
+            addUrlBtn.style.borderRadius = '0 4px 4px 0';
+            addUrlBtn.style.padding = '8px 15px';
+            addUrlBtn.style.cursor = 'pointer';
+
+            customUrlContainer.appendChild(customUrlInput);
+            customUrlContainer.appendChild(addUrlBtn);
+
+            // Create player controls
+            const playerControls = document.createElement('div');
+            playerControls.classList.add('player-controls');
+            playerControls.style.display = 'flex';
+            playerControls.style.justifyContent = 'space-between';
+            playerControls.style.marginTop = '10px';
+
+            const playPauseBtn = document.createElement('button');
+            playPauseBtn.classList.add('player-btn');
+            playPauseBtn.textContent = 'Play';
+            playPauseBtn.style.background = 'var(--accent-color)';
+            playPauseBtn.style.color = 'white';
+            playPauseBtn.style.border = 'none';
+            playPauseBtn.style.borderRadius = '4px';
+            playPauseBtn.style.padding = '8px 15px';
+            playPauseBtn.style.flex = '1';
+            playPauseBtn.style.marginRight = '5px';
+            playPauseBtn.style.cursor = 'pointer';
+
+            const stopBtn = document.createElement('button');
+            stopBtn.classList.add('player-btn');
+            stopBtn.textContent = 'Stop';
+            stopBtn.style.background = 'var(--bg-color)';
+            stopBtn.style.border = '1px solid var(--border-color)';
+            stopBtn.style.borderRadius = '4px';
+            stopBtn.style.padding = '8px 15px';
+            stopBtn.style.flex = '1';
+            stopBtn.style.marginLeft = '5px';
+            stopBtn.style.cursor = 'pointer';
+
+            playerControls.appendChild(playPauseBtn);
+            playerControls.appendChild(stopBtn);
+
+            // Create iframe container for embedded players
+            const playerContainer = document.createElement('div');
+            playerContainer.id = 'player-container';
+            playerContainer.style.display = 'none';
+            playerContainer.style.marginTop = '10px';
+
+            // Now Playing display
+            const nowPlayingContainer = document.createElement('div');
+            nowPlayingContainer.style.marginTop = '10px';
+            nowPlayingContainer.style.fontSize = '0.9rem';
+            nowPlayingContainer.style.textAlign = 'center';
+
+            const nowPlayingText = document.createElement('div');
+            nowPlayingText.id = 'now-playing';
+            nowPlayingText.textContent = 'Not playing';
+            nowPlayingText.style.opacity = '0.7';
+
+            nowPlayingContainer.appendChild(nowPlayingText);
+
+            // Add everything to the music player container
+            musicPlayerContainer.appendChild(customUrlContainer);
+            musicPlayerContainer.appendChild(playerControls);
+            musicPlayerContainer.appendChild(playerContainer);
+            musicPlayerContainer.appendChild(nowPlayingContainer);
+
+            // Append to music widget
+            document.querySelector('.music-widget').appendChild(musicPlayerContainer);
+
+            // Add event listeners
+            addUrlBtn.addEventListener('click', () => {
+                const url = customUrlInput.value.trim();
+                if (url) {
+                    addCustomPlaylist(url);
+                    customUrlInput.value = '';
+                }
+            });
+
+            playPauseBtn.addEventListener('click', () => {
+                if (currentlyPlaying) {
+                    togglePlayPause();
+                    playPauseBtn.textContent = playPauseBtn.textContent === 'Play' ? 'Pause' : 'Play';
+                } else {
+                    alert('Please select a playlist or add a custom URL first');
+                }
+            });
+
+            stopBtn.addEventListener('click', () => {
+                stopPlayback();
+                playPauseBtn.textContent = 'Play';
+            });
+
+            // Add keypress event for URL input
+            customUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const url = customUrlInput.value.trim();
+                    if (url) {
+                        addCustomPlaylist(url);
+                        customUrlInput.value = '';
+                    }
+                }
+            });
+        }
+
+        function addCustomPlaylist(url) {
+            // Check if it's a valid YouTube or Spotify URL
+            if (!isValidMusicUrl(url)) {
+                alert('Please enter a valid YouTube or Spotify URL');
+                return;
+            }
+
+            // Add to custom playlists
+            const serviceName = url.includes('youtube') || url.includes('youtu.be') ? 'youtube' : 'spotify';
+            const playlistName = `Custom ${serviceName === 'youtube' ? 'YouTube' : 'Spotify'} ${customPlaylists.length + 1}`;
+
+            customPlaylists.push({
+                name: playlistName,
+                url: url,
+                service: serviceName
+            });
+
+            // Save to localStorage
+            localStorage.setItem('studyHypeCustomPlaylists', JSON.stringify(customPlaylists));
+
+            // Update playlists and play the newly added URL
+            updatePlaylists();
+            playMusic(url, playlistName);
+        }
+
+        function isValidMusicUrl(url) {
+            // Simple validation for YouTube and Spotify URLs
+            return (
+                url.includes('youtube.com/watch') ||
+                url.includes('youtu.be/') ||
+                url.includes('spotify.com/track') ||
+                url.includes('spotify.com/playlist') ||
+                url.includes('spotify.com/album')
+            );
+        }
+
+        function playMusic(url, name) {
+            const playerContainer = document.getElementById('player-container');
+            const nowPlaying = document.getElementById('now-playing');
+
+            // Stop current playback if any
+            stopPlayback();
+
+            // Set currently playing
+            currentlyPlaying = { url, name };
+            nowPlaying.textContent = `Now playing: ${name}`;
+
+            // Create appropriate player based on URL
+            if (url.includes('youtube') || url.includes('youtu.be')) {
+                createYouTubePlayer(url);
+            } else if (url.includes('spotify')) {
+                createSpotifyPlayer(url);
+            }
+
+            playerContainer.style.display = 'block';
+        }
+
+        function createYouTubePlayer(url) {
+            // Extract video ID from URL
+            let videoId = '';
+
+            if (url.includes('youtube.com/watch')) {
+                const urlParams = new URLSearchParams(new URL(url).search);
+                videoId = urlParams.get('v');
+            } else if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1].split('?')[0];
+            }
+
+            if (!videoId) return;
+
+            const playerContainer = document.getElementById('player-container');
+            playerContainer.innerHTML = '';
+
+            // Create iframe
+            const iframe = document.createElement('iframe');
+            iframe.width = '100%';
+            iframe.height = '80';
+            iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+            iframe.frameBorder = '0';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            iframe.allowFullscreen = true;
+
+            playerContainer.appendChild(iframe);
+
+            // Store reference to player
+            musicPlayer = { type: 'youtube', element: iframe };
+        }
+
+        function createSpotifyPlayer(url) {
+            // Extract Spotify URI from URL
+            let spotifyId = '';
+            let embedType = '';
+
+            if (url.includes('spotify.com/track/')) {
+                spotifyId = url.split('track/')[1].split('?')[0];
+                embedType = 'track';
+            } else if (url.includes('spotify.com/playlist/')) {
+                spotifyId = url.split('playlist/')[1].split('?')[0];
+                embedType = 'playlist';
+            } else if (url.includes('spotify.com/album/')) {
+                spotifyId = url.split('album/')[1].split('?')[0];
+                embedType = 'album';
+            }
+
+            if (!spotifyId) return;
+
+            const playerContainer = document.getElementById('player-container');
+            playerContainer.innerHTML = '';
+
+            // Create iframe
+            const iframe = document.createElement('iframe');
+            iframe.width = '100%';
+            iframe.height = '80';
+            iframe.src = `https://open.spotify.com/embed/${embedType}/${spotifyId}`;
+            iframe.frameBorder = '0';
+            iframe.allow = 'encrypted-media';
+
+            playerContainer.appendChild(iframe);
+
+            // Store reference to player
+            musicPlayer = { type: 'spotify', element: iframe };
+        }
+
+        function togglePlayPause() {
+            if (!musicPlayer) return;
+
+            // YouTube player control
+            if (musicPlayer.type === 'youtube') {
+                try {
+                    // Try to access the YouTube iframe API
+                    const iframe = musicPlayer.element;
+                    const player = iframe.contentWindow;
+
+                    // Post message to iframe
+                    player.postMessage('{"event":"command","func":"togglePlayPause","args":""}', '*');
+                } catch (err) {
+                    console.log('Could not control YouTube player:', err);
+                }
+            }
+
+            // Spotify doesn't have a simple toggle through the iframe API
+            // The best approach is to reload the iframe with autoplay
+        }
+
+        function stopPlayback() {
+            if (!musicPlayer) return;
+
+            const playerContainer = document.getElementById('player-container');
+            playerContainer.innerHTML = '';
+            playerContainer.style.display = 'none';
+
+            const nowPlaying = document.getElementById('now-playing');
+            nowPlaying.textContent = 'Not playing';
+
+            musicPlayer = null;
+            currentlyPlaying = null;
+        }
+
+        function changeService(service) {
+            currentService = service;
+            updatePlaylists();
+        }
+
+        function updatePlaylists() {
+            playlistList.innerHTML = '';
+
+            let playlists;
+
+            if (currentService === 'spotify') {
+                playlists = [
+                    { name: 'Lofi Focus', url: 'https://open.spotify.com/playlist/37i9dQZF1DX8NTLI2TtZa6' },
+                    { name: 'White Noise', url: 'https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ' },
+                    { name: 'Coding Mode', url: 'https://open.spotify.com/playlist/37i9dQZF1DX5trt9i14X7j' },
+                    { name: 'Deep Focus', url: 'https://open.spotify.com/playlist/37i9dQZF1DX9sIqqvKsjG8' },
+                    { name: 'Atmospheric Piano', url: 'https://open.spotify.com/playlist/37i9dQZF1DX3PFzdbtx1Us' }
+                ];
+            } else {
+                playlists = [
+                    { name: 'Study With Me', url: 'https://www.youtube.com/watch?v=1ex_bNIFR1A' },
+                    { name: 'Focus Music', url: 'https://www.youtube.com/watch?v=Dw20ZkMwI10' },
+                    { name: 'Rain Sounds', url: 'https://www.youtube.com/watch?v=yIQd2Ya0Ziw' },
+                    { name: 'Lo-fi Hip Hop', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
+                    { name: 'Study Ambience', url: 'https://www.youtube.com/watch?v=UHdZMZx7qJ4' }
+                ];
+            }
+
+            // Add custom playlists that match the current service
+            const customServicePlaylists = customPlaylists.filter(playlist => playlist.service === currentService);
+            playlists = [...playlists, ...customServicePlaylists];
+
+            playlists.forEach(playlist => {
+                const playlistItem = document.createElement('div');
+                playlistItem.classList.add('playlist-item');
+                playlistItem.dataset.url = playlist.url;
+
+                const playlistIcon = document.createElement('span');
+                playlistIcon.classList.add('playlist-icon');
+                playlistIcon.textContent = '▶️';
+
+                const playlistTitle = document.createElement('span');
+                playlistTitle.classList.add('playlist-title');
+                playlistTitle.textContent = playlist.name;
+
+                playlistItem.appendChild(playlistIcon);
+                playlistItem.appendChild(playlistTitle);
+
+                playlistItem.addEventListener('click', () => {
+                    playMusic(playlist.url, playlist.name);
+                    document.querySelector('.player-btn').textContent = 'Pause';
+                });
+
+                playlistList.appendChild(playlistItem);
+            });
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-theme');
+            themeToggle.textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+            localStorage.setItem('studyHypeDarkMode', isDarkMode);
+        }
+
+        // Save notes
+        function saveNotes() {
+            localStorage.setItem('studyHypeNotes', notesTextarea.value);
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startApp);
+
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                startApp();
+            }
+        });
+
+        timerButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                timerButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                setTimerDuration(parseInt(button.dataset.time));
+            });
+        });
+
+        startTimerBtn.addEventListener('click', startTimer);
+        resetTimerBtn.addEventListener('click', resetTimer);
+
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        addTodoBtn.addEventListener('click', addTodo);
+
+        serviceButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                serviceButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                changeService(button.dataset.service);
+            });
+        });
+
+        themeToggle.addEventListener('click', toggleDarkMode);
+
+        notesTextarea.addEventListener('input', saveNotes);
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // If user has already used the app before, skip welcome screen
+            if (localStorage.getItem('studyHypeTodos') || localStorage.getItem('studyHypeNotes')) {
+                startApp();
+            }
+        });
+
+        // Listen for messages from embedded players
+        window.addEventListener('message', (event) => {
+            // Handle messages from YouTube iframe API if needed
+            try {
+                const data = JSON.parse(event.data);
+                if (data.event === 'onStateChange' && data.info === 0) {
+                    // Video ended
+                    document.querySelector('.player-btn').textContent = 'Play';
+                }
+            } catch (e) {
+                // Not a JSON message or not from our players
+            }
+        });
+        // Settings functionality
+        const settingsToggle = document.getElementById('settings-toggle');
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsBtns = document.querySelectorAll('.settings-btn');
+        let isMonoFont = false;
+
+        // Initialize settings from localStorage
+        function initSettings() {
+            if (localStorage.getItem('studyHypeMonoFont') === 'true') {
+                toggleMonoFont();
+                document.querySelector('[data-setting="font"][data-value="mono"]').classList.add('active');
+                document.querySelector('[data-setting="font"][data-value="standard"]').classList.remove('active');
+            }
+
+            if (isDarkMode) {
+                document.querySelector('[data-setting="theme"][data-value="dark"]').classList.add('active');
+                document.querySelector('[data-setting="theme"][data-value="light"]').classList.remove('active');
+            }
+        }
+
+        // Toggle settings panel
+        settingsToggle.addEventListener('click', () => {
+            if (settingsPanel.style.display === 'none') {
+                settingsPanel.style.display = 'block';
+            } else {
+                settingsPanel.style.display = 'none';
+            }
+        });
+
+        // Handle settings button clicks
+        settingsBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const setting = btn.dataset.setting;
+                const value = btn.dataset.value;
+
+                // Deactivate all buttons in this setting group
+                document.querySelectorAll(`[data-setting="${setting}"]`).forEach(b => {
+                    b.classList.remove('active');
+                });
+
+                // Activate the clicked button
+                btn.classList.add('active');
+
+                // Apply the setting
+                if (setting === 'theme') {
+                    if (value === 'dark' && !isDarkMode) {
+                        toggleDarkMode();
+                    } else if (value === 'light' && isDarkMode) {
+                        toggleDarkMode();
+                    }
+                } else if (setting === 'font') {
+                    if (value === 'mono' && !isMonoFont) {
+                        toggleMonoFont();
+                    } else if (value === 'standard' && isMonoFont) {
+                        toggleMonoFont();
+                    }
+                }
+            });
+        });
+
+        // Toggle mono font
+        function toggleMonoFont() {
+            isMonoFont = !isMonoFont;
+            document.body.classList.toggle('mono-font');
+            localStorage.setItem('studyHypeMonoFont', isMonoFont);
+        }
+
+        // Click outside to close settings panel
+        document.addEventListener('click', (e) => {
+            if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) {
+                settingsPanel.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
